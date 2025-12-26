@@ -1,8 +1,14 @@
 const { i18n } = require('./next-i18next.config');
+const path = require('path');
 
 module.exports = {
     eslint: {
-        dirs: ['src'], // Only run ESLint on the 'pages' and 'utils' directories during production builds (next build)
+        dirs: ['src'],
     },
+    reactStrictMode: false,
     i18n,
+    webpack: (config) => {
+        config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+        return config;
+    },
 }

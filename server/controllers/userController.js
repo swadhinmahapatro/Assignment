@@ -1,6 +1,7 @@
 const User = require('../models/userModel');
 const asyncErrorHandler = require('../middlewares/helpers/asyncErrorHandler');
 const sendToken = require('../utils/sendToken');
+const { successResponse } = require('../utils/sucessAndError');
 const ErrorHandler = require('../utils/errorHandler');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
@@ -36,22 +37,22 @@ exports.loginUser = asyncErrorHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new ErrorHandler('Please Enter Email And Password', 400));
+    return next(new ErrorHandler('Email and password are required', axios.HttpStatusCode.BadRequest));
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const normalizedEmail = email.toLowerCase().trim();
 
-  if (!user) {
-    return next(new ErrorHandler('Invalid Email or Password', 401));
+  const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+  if (!user || !(await user.comparePassword(password))) {
+    return next(new ErrorHandler('Invalid email or password', axios.HttpStatusCode.NotFound));
   }
-
-  const isPasswordMatched = await user.comparePassword(password);
-
-  if (!isPasswordMatched) {
-    return next(new ErrorHandler('Invalid Email or Password', 401));
-  }
-  sendToken(user, 201, res);
+  user.password = undefined;
+  return res
+    .status(axios.HttpStatusCode.Ok)
+    .json(successResponse(user, 'Login successful'));
 });
+
 
 // Logout User
 exports.logoutUser = asyncErrorHandler(async (req, res, next) => {

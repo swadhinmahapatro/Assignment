@@ -10,10 +10,9 @@ const IndexPage: NextPage = () => {
         <title >Web3Games On-Chain | Dapp</title>
         <Link passHref rel="icon" href="/web3gsmall.png" />
       </Head>
-          <Home></Home>
+      <Home></Home>
     </>
   )
 }
 
 export default IndexPage
-
